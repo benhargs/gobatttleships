@@ -14,15 +14,36 @@ The player to first sink all their opponent's battleships is the winner
 
 //All code in here is example code, you do not have to keep any of it.
 
-func PlayerOneTurn(playerTwoGrid [8][8]string, shotCoordinates []int) (shotStatus bool) {
+func PlayerOneTurn(playerTwoGrid [7][7]string, shotCoordinates []int) (shotStatus bool) {
 	return false //shot missed
 }
 
-func PlayerTwoTurn(playerOneGrid [8][8]string, shotCoordinates []int) (shotStatus bool) {
+func PlayerTwoTurn(playerOneGrid [7][7]string, shotCoordinates []int) (shotStatus bool) {
 	return true //shot hit
 }
 
-func CreateGrid() (grid [8][8]string) {
+func CreateGrid() (grid [7][7]string) {
 	//this is a fixed array, not a slice
-	return [8][8]string{}
+	return [7][7]string{}
+}
+
+func placeShip(grid [7][7]string, desiredCol int, desiredRow int) [7][7]string {
+	grid[desiredCol][desiredRow] = "S"
+	return grid
+}
+
+func isShipAt(grid [7][7]string, desiredCol int, desiredRow int) bool {
+	if grid[desiredCol][desiredRow] == "" {
+		return true
+	}
+
+	return false
+}
+
+func isShipHit(grid [7][7]string, desiredCol int, desiredRow int) bool {
+	if grid[desiredCol][desiredRow] == "S" {
+		return true
+	}
+
+	return false
 }
