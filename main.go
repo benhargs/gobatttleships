@@ -1,5 +1,10 @@
 package main
 
+import (
+	"errors"
+	"fmt"
+)
+
 /*
 This game of battleships is very simple to start:
 There are 2 players
@@ -27,23 +32,78 @@ func CreateGrid() (grid [7][7]string) {
 	return [7][7]string{}
 }
 
-func placeShip(grid [7][7]string, desiredCol int, desiredRow int) [7][7]string {
-	grid[desiredCol][desiredRow] = "S"
-	return grid
+func CountOfShipsOnBoard(grid [7][7]string) int {
+	numberOfShips := 0
+
+	for _, row := range grid {
+		for _, coordinates := range row {
+			if coordinates == "Ship" {
+				numberOfShips++
+			}
+		}
+	}
+
+	return numberOfShips
 }
 
-func isShipAt(grid [7][7]string, desiredCol int, desiredRow int) bool {
-	if grid[desiredCol][desiredRow] == "" {
+func hasPlayerWon(grid [7][7]string) bool {
+	numberOfSunkShips := 0
+
+	for _, row := range grid {
+		for _, coordinates := range row {
+			if coordinates == "Sunk" {
+				numberOfSunkShips++
+			}
+		}
+	}
+
+	if numberOfSunkShips == 9 {
 		return true
 	}
 
 	return false
 }
 
-func isShipHit(grid [7][7]string, desiredCol int, desiredRow int) bool {
-	if grid[desiredCol][desiredRow] == "S" {
-		return true
+func placeShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
+	coordErr := areCoordinatesOnPlayingGrid(row, col)
+
+	if coordErr != nil {
+		return grid, coordErr
 	}
 
-	return false
+	if grid[row][col] == "Ship" {
+		return grid, fmt.Errorf("ship already placed at coordinates row: %d and column: %d", row, col)
+	}
+
+	shipCount := CountOfShipsOnBoard(grid)
+	if shipCount == 9 {
+		return grid, errors.New("too many ships")
+	}
+
+	grid[row][col] = "Ship"
+	return grid, nil
+}
+
+func shootAtOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, bool) {
+	offGridErr := areCoordinatesOnPlayingGrid(row, col)
+	if offGridErr != nil {
+		return grid, offGridErr, false
+	}
+
+	if grid[row][col] == "Ship" {
+		grid[row][col] = "Sunk"
+		return grid, nil, true
+	}
+
+	return grid, nil, false
+}
+
+func areCoordinatesOnPlayingGrid(row int, col int) error {
+	if row < 0 || row > 6 {
+		return fmt.Errorf("invalid row value: row = %d, want between 0 & 6 ", row)
+	}
+	if col < 0 || col > 6 {
+		return fmt.Errorf("invalid column value: column = %d, want between 0 & 6 ", col)
+	}
+	return nil
 }

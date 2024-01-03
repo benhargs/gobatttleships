@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -10,16 +11,10 @@ import (
 //go test -v
 //in the terminal window
 
-// this is a utility function for testing
-// it will return a random square on the grid
-// it does not keep track of any previously returned grids
 func getRandomGridSquare() []int {
-
 	row := []int{1, 2, 3, 4, 5, 6, 7}
 	column := []int{1, 2, 3, 4, 5, 6, 7}
-
 	return []int{rand.Intn(len(row)) + 1, rand.Intn(len(column)) + 1}
-
 }
 
 //these are the two tests we have for our functions in main
@@ -31,9 +26,20 @@ func TestCreateGrid(t *testing.T) {
 
 	//Act
 	grid := CreateGrid()
+	expectedCols := 7
+	expectedRows := 7
 
 	//Assert
-	assertGridIsCorrectSize(t, grid, 7, 7)
+	GridSizeCols := len(grid)
+	if GridSizeCols != expectedCols {
+		t.Errorf("Grid has wrong number of columns. Expected %d but was %d", expectedCols, GridSizeCols)
+		//t.Errorf to allow error message with values %v.
+	}
+
+	GridSizeRows := len(grid[0])
+	if GridSizeRows != expectedRows {
+		t.Errorf("Grid has wrong number of rows. Expected %d, but was %d", expectedRows, GridSizeRows)
+	}
 }
 
 //one good place to start here is by using our utility function
@@ -60,105 +66,332 @@ func TestPlayerTwoTakingShot(t *testing.T) {
 	}
 }
 
-//other tests here that fail
-
 // sometimes we write tests to test our own functions.
 func TestGetRandomGridSquare(t *testing.T) {
 	gridSquare := getRandomGridSquare()
 
 	//literally only exists here to show you the output
 	//should not exist in a real test
-	fmt.Println(gridSquare)
+	fmt.Println("From TestGetRandomGridSquare.", gridSquare)
 
 	//poor test making use of magic numbers
 	//you should probably re-write it
-	if gridSquare[0] <= 0 || gridSquare[0] >= 8 {
-		t.Error("Grid square row should be >0 and <8, but got: ", gridSquare[0])
+	if gridSquare[0] < 1 || gridSquare[0] >= 8 {
+		t.Error("Grid square row should be >-1 and <7, but got: ", gridSquare[0])
 	}
 
-	if gridSquare[1] <= 0 || gridSquare[1] >= 8 {
-		t.Error("Grid square column should be >0 and <8, but got: ", gridSquare[1])
+	if gridSquare[1] < 1 || gridSquare[1] >= 8 {
+		t.Error("Grid square column should be >-1 and <7, but got: ", gridSquare[1])
 	}
+
 }
 
-func TestPlaceAShip(t *testing.T) {
+func TestCannotPlaceShipOnAShip(t *testing.T) {
 	// Arrange
 	grid := CreateGrid()
+	gridWithShip, _ := placeShip(grid, 3, 6)
 
 	//Act
-	desiredCol := 3
-	desiredRow := 5
-	updatedGrid := placeShip(grid, desiredCol, desiredRow)
-
-	// ... by here the ship will have been place on the grid!
+	_, shipErr := placeShip(gridWithShip, 3, 6)
 
 	//Assert
-	// A ship is placed
-	actual := updatedGrid[3][5]
-	want := "S"
-	if actual != want {
-		t.Error("Ship was not placed at col 3, row 5")
+	want := errors.New("ship already placed at coordinates row: 3 and column: 6")
+
+	if shipErr.Error() != want.Error() {
+		t.Errorf("wanted %v got %v", want, shipErr)
 	}
 }
 
-// Test to see if ship is already there
+func TestCannotPlaceShipOnAShipReportCoordinates(t *testing.T) {
+	// Arrange
+	grid := CreateGrid()
+	gridWithShip, _ := placeShip(grid, 1, 5)
 
-func TestIsThereAShip(t *testing.T) {
+	//Act
+	_, shipErr := placeShip(gridWithShip, 1, 5)
+
+	//Assert
+	want := errors.New("ship already placed at coordinates row: 1 and column: 5")
+
+	if shipErr.Error() != want.Error() {
+		t.Errorf("wanted %v got %v", want, shipErr)
+	}
+}
+
+func TestCannotPlaceTenthShip(t *testing.T) {
+	//Arrange (set things up)
+	grid := CreateGrid()
+	gridWith1Ship, _ := placeShip(grid, 1, 2)
+	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
+	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
+	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
+	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
+	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
+	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
+	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
+	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
+
+	//Act
+	_, got := placeShip(gridWith9Ships, 3, 5)
+
+	//Assert
+	want := errors.New("too many ships")
+
+	if got.Error() != want.Error() {
+		t.Errorf("Got %v want %v", got, want)
+	}
+}
+
+func TestPlacingTenthShipDoesNotChangeGrid(t *testing.T) {
+	//Arrange (set things up)
+	grid := CreateGrid()
+	gridWith1Ship, _ := placeShip(grid, 1, 2)
+	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
+	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
+	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
+	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
+	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
+	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
+	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
+	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
+
+	//Act
+	got, _ := placeShip(gridWith9Ships, 3, 5)
+
+	//Assert
+	want := gridWith9Ships
+
+	if got != want {
+		t.Errorf("Got %v want %v", got, want)
+	}
+
+}
+
+/*
+func TestHasPlayerWon(t *testing.T) {
+	//Arrange (set things up)
+	grid := CreateGrid()
+	gridWith1Ship, _ := placeShip(grid, 1, 2)
+	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
+	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
+	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
+	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
+	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
+	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
+	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
+	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
+
+	gridWith1SunkShip, _ := shootAtOpponent(gridWith9Ships, 1, 2)
+	gridWith2SunkShips, _ := shootAtOpponent(gridWith1SunkShip, 2, 3)
+	gridWith3SunkShips, _ := shootAtOpponent(gridWith2SunkShips, 3, 4)
+	gridWith4SunkShips, _ := shootAtOpponent(gridWith3SunkShips, 4, 5)
+	gridWith5SunkShips, _ := shootAtOpponent(gridWith4SunkShips, 5, 6)
+	gridWith6SunkShips, _ := shootAtOpponent(gridWith5SunkShips, 6, 4)
+	gridWith7SunkShips, _ := shootAtOpponent(gridWith6SunkShips, 5, 1)
+	gridWith8SunkShips, _ := shootAtOpponent(gridWith7SunkShips, 1, 3)
+	gridWith9SunkShips, _ := shootAtOpponent(gridWith8SunkShips, 2, 4)
+
+	//Act
+	playerWin := hasPlayerWon(gridWith9SunkShips)
+
+	//Assert
+	if playerWin == false {
+		t.Errorf("Player has not won.")
+	}
+
+}
+
+func TestHasPlayerNotWon(t *testing.T) {
+	//Arrange (set things up)
+	grid := CreateGrid()
+	gridWith1Ship, _ := placeShip(grid, 1, 2)
+	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
+	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
+	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
+	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
+	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
+	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
+	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
+	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
+
+	gridWith1SunkShip, _ := shootAtOpponent(gridWith9Ships, 1, 2)
+	gridWith2SunkShips, _ := shootAtOpponent(gridWith1SunkShip, 2, 3)
+	gridWith3SunkShips, _ := shootAtOpponent(gridWith2SunkShips, 3, 4)
+	gridWith4SunkShips, _ := shootAtOpponent(gridWith3SunkShips, 4, 5)
+	gridWith5SunkShips, _ := shootAtOpponent(gridWith4SunkShips, 5, 6)
+	gridWith6SunkShips, _ := shootAtOpponent(gridWith5SunkShips, 6, 4)
+	gridWith7SunkShips, _ := shootAtOpponent(gridWith6SunkShips, 5, 1)
+	gridWith8SunkShips, _ := shootAtOpponent(gridWith7SunkShips, 1, 3)
+
+	//Act
+	playerWin := hasPlayerWon(gridWith8SunkShips)
+
+	//Assert
+	if playerWin == true {
+		t.Errorf("Player has won.")
+	}
+}
+*/
+
+func TestCannotPlaceShipOutsideGrid(t *testing.T) {
+	type coordinates struct {
+		row       int
+		col       int
+		errorText string
+	}
+	shipCoordinates := []coordinates{
+		{row: 7, col: 6, errorText: "invalid row value: row = 7, want between 0 & 6 "},
+		{row: -1, col: 0, errorText: "invalid row value: row = -1, want between 0 & 6 "},
+		{row: 0, col: -1, errorText: "invalid column value: column = -1, want between 0 & 6 "},
+		{row: 6, col: 7, errorText: "invalid column value: column = 7, want between 0 & 6 "},
+	}
+
+	//Act (run the code you want to do the thing)
+	for _, coordinates := range shipCoordinates {
+		//arrange
+		grid := CreateGrid()
+
+		//act
+		_, got := placeShip(grid, coordinates.row, coordinates.col)
+
+		//assert
+		want := errors.New(coordinates.errorText)
+		if got.Error() != want.Error() {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	}
+}
+
+func TestCanPlaceShipAtEdgesOfGrid(t *testing.T) {
+	type coordinates struct {
+		row int
+		col int
+	}
+	shipCoordinates := []coordinates{
+		{row: 6, col: 6},
+		{row: 0, col: 0},
+		{row: 0, col: 6},
+		{row: 6, col: 0},
+	}
+
+	//Act (run the code you want to do the thing)
+	for _, coordinates := range shipCoordinates {
+		//arrange
+		grid := CreateGrid()
+
+		//act
+		_, got := placeShip(grid, coordinates.row, coordinates.col)
+
+		//assert
+		if got != nil {
+			t.Errorf("got %v, want no error", got)
+		}
+	}
+}
+
+func TestCannotPlaceShipOutsideGridDoesntChangeGrid(t *testing.T) {
+	type coordinates struct {
+		row int
+		col int
+	}
+
+	shipCoordinates := []coordinates{
+		{row: 7, col: 6},
+		{row: -1, col: 0},
+		{row: 0, col: -1},
+		{row: 4, col: 7},
+	}
+
+	for _, coordinates := range shipCoordinates {
+		//arrange
+		grid := CreateGrid()
+
+		//act
+		got, _ := placeShip(grid, coordinates.row, coordinates.col)
+
+		//assert
+		want := grid
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	}
+}
+
+func TestCannotShootOutsideGrid(t *testing.T) {
+	type coordinates struct {
+		row       int
+		col       int
+		errorText string
+	}
+	shotCoordinates := []coordinates{
+		{row: 7, col: 6, errorText: "invalid row value: row = 7, want between 0 & 6 "},
+		{row: -1, col: 0, errorText: "invalid row value: row = -1, want between 0 & 6 "},
+		{row: 0, col: -1, errorText: "invalid column value: column = -1, want between 0 & 6 "},
+		{row: 6, col: 7, errorText: "invalid column value: column = 7, want between 0 & 6 "},
+	}
+
+	for _, coordinates := range shotCoordinates {
+		//arrange
+		grid := CreateGrid()
+
+		//act
+		_, got, _ := shootAtOpponent(grid, coordinates.row, coordinates.col)
+
+		//assert
+		want := errors.New(coordinates.errorText)
+		if got.Error() != want.Error() {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	}
+}
+
+func TestHasShotHitShip(t *testing.T) {
 	//Arrange
 	grid := CreateGrid()
-
-	ShipCol := 1
-	ShipRow := 2
-	updatedGrid := placeShip(grid, ShipCol, ShipRow)
-
-	EmptyCol := 2
-	EmptyRow := 2
+	GridWithTargetShip, _ := placeShip(grid, 4, 5)
 
 	//Act
-
-	IsEmpty := isShipAt(updatedGrid, EmptyCol, EmptyRow)
+	_, _, got := shootAtOpponent(GridWithTargetShip, 4, 5)
 
 	//Assert
-
-	if IsEmpty == false {
-		t.Error("These Coordinates already have a ship.")
+	want := true
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
 	}
-
 }
 
-//Shot at ship
-
-func TestShootAShip(t *testing.T) {
+func TestHasShotHitShipAndChangedPlayerGrid(t *testing.T) {
 	//Arrange
 	grid := CreateGrid()
-	shipCol := 2
-	shipRow := 2
-
-	updatedGrid := placeShip(grid, shipCol, shipRow)
-
-	shotCol := 2
-	shotRow := 2
+	GridWithTargetShip, _ := placeShip(grid, 4, 5)
 
 	//Act
-
-	isHit := isShipHit(updatedGrid, shotCol, shotRow)
+	got, _, _ := shootAtOpponent(GridWithTargetShip, 4, 5)
 
 	//Assert
-	if isHit == false {
-		t.Error("Your shot missed!")
+	grid[4][5] = "Sunk"
+	want := grid
+
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
-//Already shot at ship
+func TestShipCannotBeSunkTwice(t *testing.T) {
+	//Arrange
+	grid := CreateGrid()
+	gridWithShip, _ := placeShip(grid, 1, 4)
+	gridWithSunkShip, _, _ := shootAtOpponent(gridWithShip, 1, 4)
 
-func assertGridIsCorrectSize(t *testing.T, grid [7][7]string, expectedRows int, expectedCols int) {
-	GridSizeCols := len(grid)
-	if GridSizeCols != expectedCols {
-		t.Error("Grid has wrong number of columns. Wanted 7 but was", GridSizeCols)
-	}
+	//Act
+	_, _, got := shootAtOpponent(gridWithSunkShip, 1, 4)
 
-	GridSizeRows := len(grid[0])
-	if GridSizeRows != expectedRows {
-		t.Error("Grid has wrong number of rows. Wanted 7, but was", GridSizeRows)
+	//Assert
+	want := false
+	if got != want {
+		t.Errorf("Got %v, want %v", got, want)
 	}
 }
+
+//TestShotReportsMiss
+//TestShotReportsHit
