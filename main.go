@@ -84,18 +84,20 @@ func placeShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 	return grid, nil
 }
 
-func shootAtOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, bool) {
+func shootAtOpponent(grid [7][7]string, row int, col int) (shotResult, error) {
 	offGridErr := areCoordinatesOnPlayingGrid(row, col)
+
 	if offGridErr != nil {
-		return grid, offGridErr, false
+		return grid, offGridErr
 	}
+	/*
+		if grid[row][col] == "Ship" {
+			grid[row][col] = "Sunk"
+			return grid, nil
+		}
 
-	if grid[row][col] == "Ship" {
-		grid[row][col] = "Sunk"
-		return grid, nil, true
-	}
-
-	return grid, nil, false
+		return grid, nil
+	*/
 }
 
 func areCoordinatesOnPlayingGrid(row int, col int) error {

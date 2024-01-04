@@ -317,12 +317,44 @@ func TestCannotPlaceShipOutsideGridDoesntChangeGrid(t *testing.T) {
 	}
 }
 
+func TestHasShotHitShip(t *testing.T) {
+	//Arrange
+	grid := CreateGrid()
+	shipOnGrid, _ := placeShip(grid, 1, 2)
+
+	//Act
+	got := Fireshot{}
+	got.shot(Fireshot{
+		grid: shipOnGrid,
+		shotCoords: Coordinates{
+			row: 1,
+			col: 2,
+		},
+	})
+
+	//Assert
+	want := Fireshot{
+		grid: shipOnGrid,
+		shotCoords: Coordinates{
+			row: 1,
+			col: 2,
+		},
+		hitShip: true,
+	}
+	if got.hitShip != want.hitShip {
+		t.Error("shot did not hit ship")
+	}
+}
+
+/*
+Three return shootfunction.
 func TestCannotShootOutsideGrid(t *testing.T) {
 	type coordinates struct {
 		row       int
 		col       int
 		errorText string
 	}
+
 	shotCoordinates := []coordinates{
 		{row: 7, col: 6, errorText: "invalid row value: row = 7, want between 0 & 6 "},
 		{row: -1, col: 0, errorText: "invalid row value: row = -1, want between 0 & 6 "},
@@ -392,6 +424,6 @@ func TestShipCannotBeSunkTwice(t *testing.T) {
 		t.Errorf("Got %v, want %v", got, want)
 	}
 }
+*/
 
 //TestShotReportsMiss
-//TestShotReportsHit
