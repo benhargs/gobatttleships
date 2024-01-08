@@ -168,6 +168,7 @@ func TestPlacingTenthShipDoesNotChangeGrid(t *testing.T) {
 
 /*
 func TestHasPlayerWon(t *testing.T) {
+	//Need to sort the return values of shootOpponent
 	//Arrange (set things up)
 	grid := CreateGrid()
 	gridWith1Ship, _ := placeShip(grid, 1, 2)
@@ -317,26 +318,36 @@ func TestGridChangesAfterShipSunkByShot(t *testing.T) {
 	}
 }
 
-func TestGridChangesAfterMissedShot(t *testing.T) {
-	//Arrange
-	grid := CreateGrid()
-	gridWithShip, _ := placeShip(grid, 1, 0)
+/*
+func TestCanShootAtEdgesOfGridAndGetNoError(t *testing.T) {
+	type coordinates struct {
+		row int
+		col int
+	}
 
-	//Act
-	got := shootOpponent(gridWithShip, 1, 2)
+	shotCoordinates := []coordinates{
+		{row: 7, col: 6},
+		{row: -1, col: 0},
+		{row: 0, col: -1},
+		{row: 4, col: 7},
+	}
 
-	//Assert
-	gridWithShip[1][2] = "Miss"
-	want := gridWithShip
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
+	for _, coordinates := range shotCoordinates {
+		//arrange
+		grid := CreateGrid()
+
+		//act
+		got, _ := shootOpponent(grid, coordinates.row, coordinates.col)
+
+		//assert
+		want := grid
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
 	}
 }
+*/
 
-//func Test
-
-/*
-Three return shootfunction.
 func TestCannotShootOutsideGrid(t *testing.T) {
 	type coordinates struct {
 		row       int
@@ -356,7 +367,7 @@ func TestCannotShootOutsideGrid(t *testing.T) {
 		grid := CreateGrid()
 
 		//act
-		_, got, _ := shootAtOpponent(grid, coordinates.row, coordinates.col)
+		_, got := shootOpponent(grid, coordinates.row, coordinates.col)
 
 		//assert
 		want := errors.New(coordinates.errorText)
@@ -366,6 +377,7 @@ func TestCannotShootOutsideGrid(t *testing.T) {
 	}
 }
 
+/*
 func TestHasShotHitShip(t *testing.T) {
 	//Arrange
 	grid := CreateGrid()

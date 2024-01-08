@@ -102,15 +102,20 @@ func placeShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 }
 */
 
-func shootOpponent(grid [7][7]string, row int, col int) [7][7]string {
+func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error) {
+	coordErr := areCoordinatesOnPlayingGrid(row, col)
+
+	if coordErr != nil {
+		return grid, coordErr
+	}
+
 	shotResult := hasShotHitShip(grid, row, col)
 	if shotResult == true {
 		gridWithNewSunkShip := sinkShip(grid, row, col, shotResult)
-		return gridWithNewSunkShip
+		return gridWithNewSunkShip, nil
 	}
 
-	grid[row][col] = "Miss"
-	return grid
+	return grid, nil
 }
 
 func hasShotHitShip(grid [7][7]string, row int, col int) bool {
