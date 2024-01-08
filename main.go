@@ -46,23 +46,24 @@ func CountOfShipsOnBoard(grid [7][7]string) int {
 	return numberOfShips
 }
 
+/*
 func hasPlayerWon(grid [7][7]string) bool {
-	numberOfSunkShips := 0
-
+	numberOfShips := 0
 	for _, row := range grid {
 		for _, coordinates := range row {
-			if coordinates == "Sunk" {
-				numberOfSunkShips++
+			if coordinates == "Ship" {
+				numberOfShips++
 			}
 		}
 	}
 
-	if numberOfSunkShips == 9 {
+	if numberOfShips != 0 {
 		return true
 	}
 
 	return false
 }
+*/
 
 func placeShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 	coordErr := areCoordinatesOnPlayingGrid(row, col)
@@ -84,20 +85,47 @@ func placeShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 	return grid, nil
 }
 
-func shootAtOpponent(grid [7][7]string, row int, col int) (shotResult, error) {
-	offGridErr := areCoordinatesOnPlayingGrid(row, col)
+/*
+	func shootAtOpponent(grid [7][7]string, row int, col int) (shotResult, error) {
+		offGridErr := areCoordinatesOnPlayingGrid(row, col)
 
-	if offGridErr != nil {
-		return grid, offGridErr
-	}
-	/*
-		if grid[row][col] == "Ship" {
-			grid[row][col] = "Sunk"
-			return grid, nil
+		if offGridErr != nil {
+			return grid, offGridErr
 		}
+			if grid[row][col] == "Ship" {
+				grid[row][col] = "Sunk"
+				return grid, nil
+			}
 
-		return grid, nil
-	*/
+			return grid, nil
+
+}
+*/
+
+func shootOpponent(grid [7][7]string, row int, col int) [7][7]string {
+	shotResult := hasShotHitShip(grid, row, col)
+	if shotResult == true {
+		gridWithNewSunkShip := sinkShip(grid, row, col, shot)
+		return gridWithNewSunkShip
+	}
+
+	grid[row][col] = "Miss"
+	return grid,
+}
+
+func hasShotHitShip(grid [7][7]string, row int, col int) bool {
+	if grid[row][col] == "Ship" {
+		return true
+	}
+	return false
+}
+
+func sinkShip(grid [7][7]string, row int, col int, shotHit bool) [7][7]string {
+	if shotHit == true {
+		grid[row][col] = "Sunk"
+	}
+
+	return grid
 }
 
 func areCoordinatesOnPlayingGrid(row int, col int) error {

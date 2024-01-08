@@ -164,7 +164,6 @@ func TestPlacingTenthShipDoesNotChangeGrid(t *testing.T) {
 	if got != want {
 		t.Errorf("Got %v want %v", got, want)
 	}
-
 }
 
 /*
@@ -181,54 +180,22 @@ func TestHasPlayerWon(t *testing.T) {
 	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
 	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
 
-	gridWith1SunkShip, _ := shootAtOpponent(gridWith9Ships, 1, 2)
-	gridWith2SunkShips, _ := shootAtOpponent(gridWith1SunkShip, 2, 3)
-	gridWith3SunkShips, _ := shootAtOpponent(gridWith2SunkShips, 3, 4)
-	gridWith4SunkShips, _ := shootAtOpponent(gridWith3SunkShips, 4, 5)
-	gridWith5SunkShips, _ := shootAtOpponent(gridWith4SunkShips, 5, 6)
-	gridWith6SunkShips, _ := shootAtOpponent(gridWith5SunkShips, 6, 4)
-	gridWith7SunkShips, _ := shootAtOpponent(gridWith6SunkShips, 5, 1)
-	gridWith8SunkShips, _ := shootAtOpponent(gridWith7SunkShips, 1, 3)
-	gridWith9SunkShips, _ := shootAtOpponent(gridWith8SunkShips, 2, 4)
+	gridWith1SunkShip := shootOpponent(gridWith9Ships, 1, 2)
+	gridWith2SunkShips := shootOpponent(gridWith1SunkShip, 2, 3)
+	gridWith3SunkShips := shootOpponent(gridWith2SunkShips, 3, 4)
+	gridWith4SunkShips := shootOpponent(gridWith3SunkShips, 4, 5)
+	gridWith5SunkShips := shootOpponent(gridWith4SunkShips, 5, 6)
+	gridWith6SunkShips := shootOpponent(gridWith5SunkShips, 6, 4)
+	gridWith7SunkShips := shootOpponent(gridWith6SunkShips, 5, 1)
+	gridWith8SunkShips := shootOpponent(gridWith7SunkShips, 1, 3)
+	gridWith9SunkShips := shootOpponent(gridWith8SunkShips, 2, 4)
 
 	//Act
-	playerWin := hasPlayerWon(gridWith9SunkShips)
+	got := hasPlayerWon(gridWith9SunkShips)
 
 	//Assert
-	if playerWin == false {
-		t.Errorf("Player has not won.")
-	}
-
-}
-
-func TestHasPlayerNotWon(t *testing.T) {
-	//Arrange (set things up)
-	grid := CreateGrid()
-	gridWith1Ship, _ := placeShip(grid, 1, 2)
-	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
-	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
-	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
-	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
-	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
-	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
-	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
-	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
-
-	gridWith1SunkShip, _ := shootAtOpponent(gridWith9Ships, 1, 2)
-	gridWith2SunkShips, _ := shootAtOpponent(gridWith1SunkShip, 2, 3)
-	gridWith3SunkShips, _ := shootAtOpponent(gridWith2SunkShips, 3, 4)
-	gridWith4SunkShips, _ := shootAtOpponent(gridWith3SunkShips, 4, 5)
-	gridWith5SunkShips, _ := shootAtOpponent(gridWith4SunkShips, 5, 6)
-	gridWith6SunkShips, _ := shootAtOpponent(gridWith5SunkShips, 6, 4)
-	gridWith7SunkShips, _ := shootAtOpponent(gridWith6SunkShips, 5, 1)
-	gridWith8SunkShips, _ := shootAtOpponent(gridWith7SunkShips, 1, 3)
-
-	//Act
-	playerWin := hasPlayerWon(gridWith8SunkShips)
-
-	//Assert
-	if playerWin == true {
-		t.Errorf("Player has won.")
+	if got == true{
+		t.Errorf("player has not won")
 	}
 }
 */
@@ -317,34 +284,56 @@ func TestCannotPlaceShipOutsideGridDoesntChangeGrid(t *testing.T) {
 	}
 }
 
-func TestHasShotHitShip(t *testing.T) {
+func TestReportsShipBeingHit(t *testing.T) {
 	//Arrange
 	grid := CreateGrid()
 	shipOnGrid, _ := placeShip(grid, 1, 2)
 
 	//Act
-	got := Fireshot{}
-	got.shot(Fireshot{
-		grid: shipOnGrid,
-		shotCoords: Coordinates{
-			row: 1,
-			col: 2,
-		},
-	})
+	got := hasShotHitShip(shipOnGrid, 1, 2)
 
 	//Assert
-	want := Fireshot{
-		grid: shipOnGrid,
-		shotCoords: Coordinates{
-			row: 1,
-			col: 2,
-		},
-		hitShip: true,
-	}
-	if got.hitShip != want.hitShip {
-		t.Error("shot did not hit ship")
+	want := true
+	if got != want {
+		t.Error("shot did not report a hit ship")
 	}
 }
+
+func TestGridChangesAfterShipSunkByShot(t *testing.T) {
+	//Arrange
+	grid := CreateGrid()
+	gridWithShip, _ := placeShip(grid, 1, 2)
+	shotResult := hasShotHitShip(gridWithShip, 1, 2)
+
+	//Act
+	got := sinkShip(gridWithShip, 1, 2, shotResult)
+
+	//Assert
+	want := CreateGrid()
+	want[1][2] = "Sunk"
+
+	if got != want {
+		t.Error("grid did not change")
+	}
+}
+
+func TestGridChangesAfterMissedShot(t *testing.T) {
+	//Arrange
+	grid := CreateGrid()
+	gridWithShip, _ := placeShip(grid, 1, 0)
+
+	//Act
+	got := shootOpponent(gridWithShip, 1, 2)
+
+	//Assert
+	gridWithShip[1][2] = "Miss"
+	want := gridWithShip
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+//func Test
 
 /*
 Three return shootfunction.
@@ -425,5 +414,3 @@ func TestShipCannotBeSunkTwice(t *testing.T) {
 	}
 }
 */
-
-//TestShotReportsMiss

@@ -1,18 +1,19 @@
 package result
 
-type Fireshot struct {
-	grid       [7][7]string
-	shotCoords []Coordinates
-	hitShip    bool
+type PlayerGrid struct {
+	Grid   [7][7]string
+	Coords Shot
 }
 
-type Coordinates struct {
-	row int
-	col int
+type Shot struct {
+	Row int
+	Col int
 }
 
-func (f *Fireshot) shot(c Coordinates) {
-	if f.grid[c.row][c.col] == "Ship" {
-		f.hitShip = true
+/*
+func (p *PlayerGrid) Shoot(s Shot) {
+	if p.Grid[s.Row][s.Col] == "Ship" {
+		p.HitShip = true
 	}
 }
+*/
