@@ -166,41 +166,6 @@ func TestPlacingTenthShipDoesNotChangeGrid(t *testing.T) {
 	}
 }
 
-/*
-func TestHasPlayerWon(t *testing.T) {
-	//Need to sort the return values of shootOpponent
-	//Arrange (set things up)
-	grid := CreateGrid()
-	gridWith1Ship, _ := placeShip(grid, 1, 2)
-	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
-	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
-	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
-	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
-	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
-	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
-	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
-	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
-
-	gridWith1SunkShip := shootOpponent(gridWith9Ships, 1, 2)
-	gridWith2SunkShips := shootOpponent(gridWith1SunkShip, 2, 3)
-	gridWith3SunkShips := shootOpponent(gridWith2SunkShips, 3, 4)
-	gridWith4SunkShips := shootOpponent(gridWith3SunkShips, 4, 5)
-	gridWith5SunkShips := shootOpponent(gridWith4SunkShips, 5, 6)
-	gridWith6SunkShips := shootOpponent(gridWith5SunkShips, 6, 4)
-	gridWith7SunkShips := shootOpponent(gridWith6SunkShips, 5, 1)
-	gridWith8SunkShips := shootOpponent(gridWith7SunkShips, 1, 3)
-	gridWith9SunkShips := shootOpponent(gridWith8SunkShips, 2, 4)
-
-	//Act
-	got := hasPlayerWon(gridWith9SunkShips)
-
-	//Assert
-	if got == true{
-		t.Errorf("player has not won")
-	}
-}
-*/
-
 func TestCannotPlaceShipOutsideGrid(t *testing.T) {
 	type coordinates struct {
 		row       int
@@ -387,5 +352,38 @@ func TestCannotShootOutsideGrid(t *testing.T) {
 		if got.Error() != want.Error() {
 			t.Errorf("got %v, want %v", got, want)
 		}
+	}
+}
+
+func TestHasPlayerWon(t *testing.T) {
+	//Arrange (set things up)
+	grid := CreateGrid()
+	gridWith1Ship, _ := placeShip(grid, 1, 2)
+	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
+	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
+	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
+	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
+	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
+	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
+	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
+	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
+
+	gridWith1SunkShip, _, _ := shootOpponent(gridWith9Ships, 1, 2)
+	gridWith2SunkShips, _, _ := shootOpponent(gridWith1SunkShip, 2, 3)
+	gridWith3SunkShips, _, _ := shootOpponent(gridWith2SunkShips, 3, 4)
+	gridWith4SunkShips, _, _ := shootOpponent(gridWith3SunkShips, 4, 5)
+	gridWith5SunkShips, _, _ := shootOpponent(gridWith4SunkShips, 5, 6)
+	gridWith6SunkShips, _, _ := shootOpponent(gridWith5SunkShips, 6, 4)
+	gridWith7SunkShips, _, _ := shootOpponent(gridWith6SunkShips, 5, 1)
+	gridWith8SunkShips, _, _ := shootOpponent(gridWith7SunkShips, 1, 3)
+	gridWith9SunkShips, _, _ := shootOpponent(gridWith8SunkShips, 2, 4)
+
+	//Act
+	got := hasPlayerWon(gridWith9SunkShips)
+
+	//Assert
+	want := true
+	if got != want {
+		t.Errorf("player should of won, wanted %v got %v", want, got)
 	}
 }

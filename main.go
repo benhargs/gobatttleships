@@ -46,24 +46,22 @@ func CountOfShipsOnBoard(grid [7][7]string) int {
 	return numberOfShips
 }
 
-/*
 func hasPlayerWon(grid [7][7]string) bool {
-	numberOfShips := 0
+	numberOfSunkShips := 0
 	for _, row := range grid {
 		for _, coordinates := range row {
-			if coordinates == "Ship" {
-				numberOfShips++
+			if coordinates == "Sunk" {
+				numberOfSunkShips++
 			}
 		}
 	}
 
-	if numberOfShips != 0 {
-		return true
+	if numberOfSunkShips != 9 {
+		return false
 	}
 
-	return false
+	return true
 }
-*/
 
 func placeShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 	coordErr := areCoordinatesOnPlayingGrid(row, col)
