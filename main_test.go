@@ -281,24 +281,36 @@ func TestShipCannotBeShotTwice(t *testing.T) {
 	}
 }
 
-func TestGridCoordinatesChangeAfterShipShotToSunk(t *testing.T) {
-	//Arrange
-	grid := CreateGrid()
-	gridWithShip, _ := placeShip(grid, 1, 2)
+func TestCannotShootOutsideGrid(t *testing.T) {
+	type coordinates struct {
+		row       int
+		col       int
+		errorText string
+	}
 
-	//Act
-	got, _, _ := shootOpponent(gridWithShip, 1, 2)
+	shotCoordinates := []coordinates{
+		{row: 7, col: 6, errorText: "invalid row value: row = 7, want between 0 & 6 "},
+		{row: -1, col: 0, errorText: "invalid row value: row = -1, want between 0 & 6 "},
+		{row: 0, col: -1, errorText: "invalid column value: column = -1, want between 0 & 6 "},
+		{row: 6, col: 7, errorText: "invalid column value: column = 7, want between 0 & 6 "},
+	}
 
-	//Assert
-	want := CreateGrid()
-	want[1][2] = "Sunk"
+	for _, coordinates := range shotCoordinates {
+		//arrange
+		grid := CreateGrid()
 
-	if got[1][2] != want[1][2] {
-		t.Error("grid coordinates did not change to Sunk")
+		//act
+		_, got, _ := shootOpponent(grid, coordinates.row, coordinates.col)
+
+		//assert
+		want := errors.New(coordinates.errorText)
+		if got.Error() != want.Error() {
+			t.Errorf("got %v, want %v", got, want)
+		}
 	}
 }
 
-func TestReportCanShootAtEdgesOfGrid(t *testing.T) {
+func TestReportCanReportMissAtEdgesOfGrid(t *testing.T) {
 	type coordinates struct {
 		row int
 		col int
@@ -326,18 +338,17 @@ func TestReportCanShootAtEdgesOfGrid(t *testing.T) {
 	}
 }
 
-func TestCannotShootOutsideGrid(t *testing.T) {
+func TestReportCanShootAtEdgesOfGrid(t *testing.T) {
 	type coordinates struct {
-		row       int
-		col       int
-		errorText string
+		row int
+		col int
 	}
 
 	shotCoordinates := []coordinates{
-		{row: 7, col: 6, errorText: "invalid row value: row = 7, want between 0 & 6 "},
-		{row: -1, col: 0, errorText: "invalid row value: row = -1, want between 0 & 6 "},
-		{row: 0, col: -1, errorText: "invalid column value: column = -1, want between 0 & 6 "},
-		{row: 6, col: 7, errorText: "invalid column value: column = 7, want between 0 & 6 "},
+		{row: 0, col: 6},
+		{row: 0, col: 0},
+		{row: 6, col: 0},
+		{row: 6, col: 6},
 	}
 
 	for _, coordinates := range shotCoordinates {
@@ -345,11 +356,11 @@ func TestCannotShootOutsideGrid(t *testing.T) {
 		grid := CreateGrid()
 
 		//act
-		_, got, _ := shootOpponent(grid, coordinates.row, coordinates.col)
+		_, _, got := shootOpponent(grid, coordinates.row, coordinates.col)
 
 		//assert
-		want := errors.New(coordinates.errorText)
-		if got.Error() != want.Error() {
+		want := "miss"
+		if got != want {
 			t.Errorf("got %v, want %v", got, want)
 		}
 	}
@@ -385,5 +396,33 @@ func TestHasPlayerWon(t *testing.T) {
 	want := true
 	if got != want {
 		t.Errorf("player should of won, wanted %v got %v", want, got)
+	}
+}
+
+func TestTurnPassesFromPlayer1ToPlayer2(t *testing.T) {
+	//Arrange
+	player := 1
+
+	//Act
+	got := playerTurn(player)
+
+	//Assert
+	want := 2
+	if got != want {
+		t.Errorf("got %v, wanted %v", got, want)
+	}
+}
+
+func TestTurnPassesFromPlayer2ToPlayer1(t *testing.T) {
+	//Arrange
+	player := 2
+
+	//Act
+	got := playerTurn(player)
+
+	//Assert
+	want := 1
+	if got != want {
+		t.Errorf("got %v, wanted %v", got, want)
 	}
 }

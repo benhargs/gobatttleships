@@ -107,3 +107,11 @@ func areCoordinatesOnPlayingGrid(row int, col int) error {
 	}
 	return nil
 }
+
+func playerTurn(player int) int {
+	if player == 1 {
+		return 2
+	}
+
+	return 1
+}
