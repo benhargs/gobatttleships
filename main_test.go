@@ -291,45 +291,59 @@ func TestReportsShipBeingHit(t *testing.T) {
 	shipOnGrid, _ := placeShip(grid, 1, 2)
 
 	//Act
-	got := hasShotHitShip(shipOnGrid, 1, 2)
+	_, _, got := shootOpponent(shipOnGrid, 1, 2)
 
 	//Assert
-	want := true
+	want := "hit"
 	if got != want {
-		t.Error("shot did not report a hit ship")
+		t.Errorf("shot did not report a hit ship, got %v want %v", got, want)
 	}
 }
 
-func TestGridChangesAfterShipSunkByShot(t *testing.T) {
+func TestShipCannotBeShotTwice(t *testing.T) {
 	//Arrange
 	grid := CreateGrid()
 	gridWithShip, _ := placeShip(grid, 1, 2)
-	shotResult := hasShotHitShip(gridWithShip, 1, 2)
+	gridWithSunkShip, _, _ := shootOpponent(gridWithShip, 1, 2)
 
 	//Act
-	got := sinkShip(gridWithShip, 1, 2, shotResult)
+	_, _, got := shootOpponent(gridWithSunkShip, 1, 2)
+
+	//Arrange
+	want := "miss"
+	if got != want {
+		t.Errorf("shot was not a miss, got %v want %v", got, want)
+	}
+}
+
+func TestGridCoordinatesChangeAfterShipShotToSunk(t *testing.T) {
+	//Arrange
+	grid := CreateGrid()
+	gridWithShip, _ := placeShip(grid, 1, 2)
+
+	//Act
+	got, _, _ := shootOpponent(gridWithShip, 1, 2)
 
 	//Assert
 	want := CreateGrid()
 	want[1][2] = "Sunk"
 
-	if got != want {
-		t.Error("grid did not change")
+	if got[1][2] != want[1][2] {
+		t.Error("grid coordinates did not change to Sunk")
 	}
 }
 
-/*
-func TestCanShootAtEdgesOfGridAndGetNoError(t *testing.T) {
+func TestReportCanShootAtEdgesOfGrid(t *testing.T) {
 	type coordinates struct {
 		row int
 		col int
 	}
 
 	shotCoordinates := []coordinates{
-		{row: 7, col: 6},
-		{row: -1, col: 0},
-		{row: 0, col: -1},
-		{row: 4, col: 7},
+		{row: 0, col: 6},
+		{row: 0, col: 0},
+		{row: 6, col: 0},
+		{row: 6, col: 6},
 	}
 
 	for _, coordinates := range shotCoordinates {
@@ -337,16 +351,15 @@ func TestCanShootAtEdgesOfGridAndGetNoError(t *testing.T) {
 		grid := CreateGrid()
 
 		//act
-		got, _ := shootOpponent(grid, coordinates.row, coordinates.col)
+		_, _, got := shootOpponent(grid, coordinates.row, coordinates.col)
 
 		//assert
-		want := grid
+		want := "miss"
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
 		}
 	}
 }
-*/
 
 func TestCannotShootOutsideGrid(t *testing.T) {
 	type coordinates struct {
@@ -367,7 +380,7 @@ func TestCannotShootOutsideGrid(t *testing.T) {
 		grid := CreateGrid()
 
 		//act
-		_, got := shootOpponent(grid, coordinates.row, coordinates.col)
+		_, got, _ := shootOpponent(grid, coordinates.row, coordinates.col)
 
 		//assert
 		want := errors.New(coordinates.errorText)
@@ -376,53 +389,3 @@ func TestCannotShootOutsideGrid(t *testing.T) {
 		}
 	}
 }
-
-/*
-func TestHasShotHitShip(t *testing.T) {
-	//Arrange
-	grid := CreateGrid()
-	GridWithTargetShip, _ := placeShip(grid, 4, 5)
-
-	//Act
-	_, _, got := shootAtOpponent(GridWithTargetShip, 4, 5)
-
-	//Assert
-	want := true
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
-
-func TestHasShotHitShipAndChangedPlayerGrid(t *testing.T) {
-	//Arrange
-	grid := CreateGrid()
-	GridWithTargetShip, _ := placeShip(grid, 4, 5)
-
-	//Act
-	got, _, _ := shootAtOpponent(GridWithTargetShip, 4, 5)
-
-	//Assert
-	grid[4][5] = "Sunk"
-	want := grid
-
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
-
-func TestShipCannotBeSunkTwice(t *testing.T) {
-	//Arrange
-	grid := CreateGrid()
-	gridWithShip, _ := placeShip(grid, 1, 4)
-	gridWithSunkShip, _, _ := shootAtOpponent(gridWithShip, 1, 4)
-
-	//Act
-	_, _, got := shootAtOpponent(gridWithSunkShip, 1, 4)
-
-	//Assert
-	want := false
-	if got != want {
-		t.Errorf("Got %v, want %v", got, want)
-	}
-}
-*/

@@ -85,52 +85,19 @@ func placeShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 	return grid, nil
 }
 
-/*
-	func shootAtOpponent(grid [7][7]string, row int, col int) (shotResult, error) {
-		offGridErr := areCoordinatesOnPlayingGrid(row, col)
-
-		if offGridErr != nil {
-			return grid, offGridErr
-		}
-			if grid[row][col] == "Ship" {
-				grid[row][col] = "Sunk"
-				return grid, nil
-			}
-
-			return grid, nil
-
-}
-*/
-
-func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error) {
+func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, string) {
 	coordErr := areCoordinatesOnPlayingGrid(row, col)
 
 	if coordErr != nil {
-		return grid, coordErr
+		return grid, coordErr, ""
 	}
 
-	shotResult := hasShotHitShip(grid, row, col)
-	if shotResult == true {
-		gridWithNewSunkShip := sinkShip(grid, row, col, shotResult)
-		return gridWithNewSunkShip, nil
-	}
-
-	return grid, nil
-}
-
-func hasShotHitShip(grid [7][7]string, row int, col int) bool {
 	if grid[row][col] == "Ship" {
-		return true
-	}
-	return false
-}
-
-func sinkShip(grid [7][7]string, row int, col int, shotHit bool) [7][7]string {
-	if shotHit == true {
 		grid[row][col] = "Sunk"
+		return grid, nil, "hit"
 	}
 
-	return grid
+	return grid, nil, "miss"
 }
 
 func areCoordinatesOnPlayingGrid(row int, col int) error {
