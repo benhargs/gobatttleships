@@ -445,11 +445,6 @@ func TestPlayerMissesShotAndTurnPasses(t *testing.T) {
 }
 */
 
-/*
-TestUserInputToPlaceShips
-TestUserInputToShoot
-*/
-
 func TestPlaceNoErrorHandling(t *testing.T) {
 	//Arrange
 	gridFunc := CreateGrid()
@@ -471,3 +466,8 @@ func TestPlaceNoErrorHandling(t *testing.T) {
 		t.Errorf("Got %v, wanted %v", got, want)
 	}
 }
+
+/*
+TestUserInputToPlaceShips
+TestUserInputToShoot
+*/
