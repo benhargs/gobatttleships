@@ -404,7 +404,7 @@ func TestTurnPassesFromPlayer1ToPlayer2(t *testing.T) {
 	player := 1
 
 	//Act
-	got := playerTurn(player)
+	got := takeTurn(player)
 
 	//Assert
 	want := 2
@@ -418,11 +418,56 @@ func TestTurnPassesFromPlayer2ToPlayer1(t *testing.T) {
 	player := 2
 
 	//Act
-	got := playerTurn(player)
+	got := takeTurn(player)
 
 	//Assert
 	want := 1
 	if got != want {
 		t.Errorf("got %v, wanted %v", got, want)
+	}
+}
+
+/*
+func TestPlayerMissesShotAndTurnPasses(t *testing.T) {
+	//Arrange
+	player := 1
+	grid := CreateGrid()
+	gridWithShip := placeShip(grid, 1, 2)
+
+	//Act
+	got :=
+
+	//Assert
+	want :=
+	if got != want{
+
+	}
+}
+*/
+
+/*
+TestUserInputToPlaceShips
+TestUserInputToShoot
+*/
+
+func TestPlaceNoErrorHandling(t *testing.T) {
+	//Arrange
+	gridFunc := CreateGrid()
+	gridWithShip, _ := placeShip(gridFunc, 2, 3)
+
+	got := Player{
+		Sea: Grid{
+			Area: [7][7]string{},
+		},
+	}
+
+	ship1 := Coords{2, 3}
+	//Act
+	got.Sea.Place(ship1)
+
+	//Assert
+	want := gridWithShip
+	if got.Sea.Area != want {
+		t.Errorf("Got %v, wanted %v", got, want)
 	}
 }

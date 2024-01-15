@@ -108,10 +108,29 @@ func areCoordinatesOnPlayingGrid(row int, col int) error {
 	return nil
 }
 
-func playerTurn(player int) int {
+func takeTurn(player int) int {
 	if player == 1 {
 		return 2
 	}
 
 	return 1
+}
+
+type Coords struct {
+	Row int
+	Col int
+}
+
+type Grid struct {
+	Area [7][7]string
+}
+
+type Player struct {
+	Sea Grid
+}
+
+func (g *Grid) Place(location Coords) error {
+	//implement placing ship logic here
+	g.Area[location.Row][location.Col] = "Ship"
+	return nil
 }
