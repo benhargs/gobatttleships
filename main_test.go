@@ -639,3 +639,77 @@ func TestPlayerHitsShipOnTurnAndReportsWin(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
+
+func TestPlayerHitsShipOnTurnAndDoesNotReportWin(t *testing.T) {
+	//Arrange
+	player := 1
+	grid := CreateGrid()
+	gridWith1Ship, _ := placeShip(grid, 1, 2)
+	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
+	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
+	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
+	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
+	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
+	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
+	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
+	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
+
+	//Act
+	_, _, got := currentTurn(player, gridWith9Ships, 2, 4)
+
+	//Assert
+	want := false
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestPlayerMissesShipWithValidShotAndDoesNotReportWin(t *testing.T) {
+	//Arrange
+	player := 1
+	grid := CreateGrid()
+	gridWith1Ship, _ := placeShip(grid, 1, 2)
+	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
+	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
+	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
+	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
+	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
+	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
+	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
+	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
+
+	gridWith1SunkShip, _, _ := shootOpponent(gridWith9Ships, 1, 3)
+
+	//Act
+	_, _, got := currentTurn(player, gridWith1SunkShip, 1, 5)
+
+	//Assert
+	want := false
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestPlayerDoesNotWinGameWithInvalidShot(t *testing.T) {
+	//Arrange
+	player := 1
+	grid := CreateGrid()
+	gridWith1Ship, _ := placeShip(grid, 1, 2)
+	gridWith2Ships, _ := placeShip(gridWith1Ship, 2, 3)
+	gridWith3Ships, _ := placeShip(gridWith2Ships, 3, 4)
+	gridWith4Ships, _ := placeShip(gridWith3Ships, 4, 5)
+	gridWith5Ships, _ := placeShip(gridWith4Ships, 5, 6)
+	gridWith6Ships, _ := placeShip(gridWith5Ships, 6, 4)
+	gridWith7Ships, _ := placeShip(gridWith6Ships, 5, 1)
+	gridWith8Ships, _ := placeShip(gridWith7Ships, 1, 3)
+	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
+
+	//Act
+	_, _, got := currentTurn(player, gridWith9Ships, -1, 4)
+
+	//Assert
+	want := false
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
