@@ -690,7 +690,7 @@ func TestPlayerMissesShipWithValidShotAndDoesNotReportWin(t *testing.T) {
 	}
 }
 
-func TestPlayerDoesNotWinGameWithInvalidShot(t *testing.T) {
+func TestPlayerDoesNotWinGameWithInvalidShotOnTurn(t *testing.T) {
 	//Arrange
 	player := 1
 	grid := CreateGrid()
