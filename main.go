@@ -19,6 +19,12 @@ The player to first sink all their opponent's battleships is the winner
 
 //All code in here is example code, you do not have to keep any of it.
 
+type Player struct {
+	Player       int
+	OpponentGrid [7][7]string
+	HasWon       bool
+}
+
 func PlayerOneTurn(playerTwoGrid [7][7]string, shotCoordinates []int) (shotStatus bool) {
 	return false //shot missed
 }
@@ -46,23 +52,6 @@ func CountOfShipsOnBoard(grid [7][7]string) int {
 	return numberOfShips
 }
 
-func hasPlayerWon(grid [7][7]string) bool {
-	numberOfSunkShips := 0
-	for _, row := range grid {
-		for _, coordinates := range row {
-			if coordinates == "Sunk" {
-				numberOfSunkShips++
-			}
-		}
-	}
-
-	if numberOfSunkShips != 9 {
-		return false
-	}
-
-	return true
-}
-
 func placeShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 	coordErr := areCoordinatesOnPlayingGrid(row, col)
 
@@ -87,7 +76,7 @@ func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, st
 	coordErr := areCoordinatesOnPlayingGrid(row, col)
 
 	if coordErr != nil {
-		return grid, coordErr, ""
+		return grid, coordErr, "invalid"
 	}
 
 	if grid[row][col] == "Ship" {
@@ -108,10 +97,47 @@ func areCoordinatesOnPlayingGrid(row int, col int) error {
 	return nil
 }
 
-func playerTurn(player int) int {
+func hasPlayerWon(grid [7][7]string) bool {
+	numberOfSunkShips := 0
+	for _, row := range grid {
+		for _, coordinates := range row {
+			if coordinates == "Sunk" {
+				numberOfSunkShips++
+			}
+		}
+	}
+
+	if numberOfSunkShips == 9 {
+		return true
+	}
+
+	return false
+}
+
+func firstTurn(player int) int {
+	return 1
+}
+
+func nextTurn(player int) int {
 	if player == 1 {
 		return 2
 	}
 
 	return 1
+}
+
+func currentTurn(player int, grid [7][7]string, row int, col int) (int, string, bool) {
+	gridAfterShot, _, shotResult := shootOpponent(grid, row, col)
+	if shotResult == "miss" {
+		nextPlayer := nextTurn(player)
+		return nextPlayer, "miss", false
+	}
+
+	if shotResult == "hit" {
+		nextPlayer := nextTurn(player)
+		gameResult := hasPlayerWon(gridAfterShot)
+		return nextPlayer, "hit", gameResult
+	}
+
+	return player, "invalid", false
 }
