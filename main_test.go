@@ -436,7 +436,7 @@ func TestTurnPassesFromPlayer1ToPlayer2(t *testing.T) {
 	player := 1
 
 	//Act
-	got := nextTurn(player)
+	got := changeActivePlayer(player)
 
 	//Assert
 	want := 2
@@ -450,26 +450,12 @@ func TestTurnPassesFromPlayer2ToPlayer1(t *testing.T) {
 	player := 2
 
 	//Act
-	got := nextTurn(player)
+	got := changeActivePlayer(player)
 
 	//Assert
 	want := 1
 	if got != want {
 		t.Errorf("got %v, wanted %v", got, want)
-	}
-}
-
-func TestPlayer1GetsFirstTurnOfGame(t *testing.T) {
-	//Arrange
-	startOfGame := 0
-
-	//Act
-	got := firstTurn(startOfGame)
-
-	//Assert
-	want := 1
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
@@ -490,7 +476,7 @@ func TestPlayerHitsShipOnTurnAndReportsHit(t *testing.T) {
 	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
 
 	//Act
-	_, got, _ := currentTurn(player, gridWith9Ships, row, col)
+	_, got, _, _ := currentPlayerTakeShot(player, gridWith9Ships, row, col)
 
 	//Assert
 	want := "hit"
@@ -516,7 +502,7 @@ func TestPlayerMissesShipOnTurnAndReportsMiss(t *testing.T) {
 	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
 
 	//Act
-	_, got, _ := currentTurn(player, gridWith9Ships, row, col)
+	_, got, _, _ := currentPlayerTakeShot(player, gridWith9Ships, row, col)
 
 	//Assert
 	want := "miss"
@@ -540,7 +526,7 @@ func TestPlayerMissesGridOnTurnAndReportsInvalidShot(t *testing.T) {
 	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
 
 	//Act
-	_, got, _ := currentTurn(player, gridWith9Ships, -1, 4)
+	_, got, _, _ := currentPlayerTakeShot(player, gridWith9Ships, -1, 4)
 
 	//Assert
 	want := "invalid"
@@ -556,7 +542,7 @@ func TestTurnDoesChangeFromPlayerMissedShot(t *testing.T) {
 	gridWith1Ship, _ := placeShip(grid, 1, 2)
 
 	//Act
-	got, _, _ := currentTurn(player, gridWith1Ship, 3, 5)
+	got, _, _, _ := currentPlayerTakeShot(player, gridWith1Ship, 3, 5)
 
 	//Assert
 	want := 2
@@ -572,7 +558,7 @@ func TestTurnDoesChangeFromPlayerHitShip(t *testing.T) {
 	gridWith1Ship, _ := placeShip(grid, 1, 2)
 
 	//Act
-	got, _, _ := currentTurn(player, gridWith1Ship, 3, 5)
+	got, _, _, _ := currentPlayerTakeShot(player, gridWith1Ship, 3, 5)
 
 	//Assert
 	want := 2
@@ -598,7 +584,7 @@ func TestTurnDoesntChangePlayerAfterInvalidShot(t *testing.T) {
 	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
 
 	//Act
-	got, _, _ := currentTurn(player, gridWith9Ships, row, col)
+	got, _, _, _ := currentPlayerTakeShot(player, gridWith9Ships, row, col)
 
 	//Assert
 	want := 1
@@ -631,7 +617,7 @@ func TestPlayerHitsShipOnTurnAndReportsWin(t *testing.T) {
 	gridWith8SunkShips, _, _ := shootOpponent(gridWith7SunkShips, 1, 3)
 
 	//Act
-	_, _, got := currentTurn(player, gridWith8SunkShips, 2, 4)
+	_, _, got, _ := currentPlayerTakeShot(player, gridWith8SunkShips, 2, 4)
 
 	//Assert
 	want := true
@@ -655,7 +641,7 @@ func TestPlayerHitsShipOnTurnAndDoesNotReportWin(t *testing.T) {
 	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
 
 	//Act
-	_, _, got := currentTurn(player, gridWith9Ships, 2, 4)
+	_, _, got, _ := currentPlayerTakeShot(player, gridWith9Ships, 2, 4)
 
 	//Assert
 	want := false
@@ -681,7 +667,7 @@ func TestPlayerMissesShipWithValidShotAndDoesNotReportWin(t *testing.T) {
 	gridWith1SunkShip, _, _ := shootOpponent(gridWith9Ships, 1, 3)
 
 	//Act
-	_, _, got := currentTurn(player, gridWith1SunkShip, 1, 5)
+	_, _, got, _ := currentPlayerTakeShot(player, gridWith1SunkShip, 1, 5)
 
 	//Assert
 	want := false
@@ -705,11 +691,98 @@ func TestPlayerDoesNotWinGameWithInvalidShotOnTurn(t *testing.T) {
 	gridWith9Ships, _ := placeShip(gridWith8Ships, 2, 4)
 
 	//Act
-	_, _, got := currentTurn(player, gridWith9Ships, -1, 4)
+	_, _, got, _ := currentPlayerTakeShot(player, gridWith9Ships, -1, 4)
 
 	//Assert
 	want := false
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestReportInvalidShotCoordinatesErrorToUserOnTurn(t *testing.T) {
+	type coordinates struct {
+		row       int
+		col       int
+		errorText string
+	}
+
+	shotCoordinates := []coordinates{
+		{row: 7, col: 6, errorText: "invalid row value: row = 7, want between 0 & 6 "},
+		{row: -1, col: 0, errorText: "invalid row value: row = -1, want between 0 & 6 "},
+		{row: 0, col: -1, errorText: "invalid column value: column = -1, want between 0 & 6 "},
+		{row: 6, col: 7, errorText: "invalid column value: column = 7, want between 0 & 6 "},
+	}
+
+	for _, coordinates := range shotCoordinates {
+		//arrange
+		grid := CreateGrid()
+
+		//act
+		_, _, _, got := currentPlayerTakeShot(1, grid, coordinates.row, coordinates.col)
+
+		//assert
+		want := errors.New(coordinates.errorText)
+		if got.Error() != want.Error() {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	}
+}
+
+func TestValidMissedShotReturnsNoErrorOnTurn(t *testing.T) {
+	type coordinates struct {
+		row int
+		col int
+	}
+
+	shotCoordinates := []coordinates{
+		{row: 0, col: 6},
+		{row: 0, col: 0},
+		{row: 6, col: 0},
+		{row: 6, col: 6},
+	}
+
+	for _, coordinates := range shotCoordinates {
+		//arrange
+		grid := CreateGrid()
+
+		//act
+		_, _, _, got := currentPlayerTakeShot(1, grid, coordinates.row, coordinates.col)
+
+		//assert
+		if got != nil {
+			t.Errorf("got %v, want no error", got)
+		}
+	}
+}
+
+func TestValidHitShotReturnsNoErrorOnTurn(t *testing.T) {
+	type coordinates struct {
+		row int
+		col int
+	}
+
+	shotCoordinates := []coordinates{
+		{row: 0, col: 6},
+		{row: 0, col: 0},
+		{row: 6, col: 0},
+		{row: 6, col: 6},
+	}
+
+	for _, coordinates := range shotCoordinates {
+		//arrange
+		grid := CreateGrid()
+		gridWith1Ship, _ := placeShip(grid, 0, 6)
+		gridWith2Ships, _ := placeShip(gridWith1Ship, 0, 0)
+		gridWith3Ships, _ := placeShip(gridWith2Ships, 6, 6)
+		gridWith4Ships, _ := placeShip(gridWith3Ships, 6, 0)
+
+		//act
+		_, _, _, got := currentPlayerTakeShot(1, gridWith4Ships, coordinates.row, coordinates.col)
+
+		//assert
+		if got != nil {
+			t.Errorf("got %v, want no error", got)
+		}
 	}
 }

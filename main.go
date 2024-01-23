@@ -19,12 +19,6 @@ The player to first sink all their opponent's battleships is the winner
 
 //All code in here is example code, you do not have to keep any of it.
 
-type Player struct {
-	Player       int
-	OpponentGrid [7][7]string
-	HasWon       bool
-}
-
 func PlayerOneTurn(playerTwoGrid [7][7]string, shotCoordinates []int) (shotStatus bool) {
 	return false //shot missed
 }
@@ -114,30 +108,26 @@ func hasPlayerWon(grid [7][7]string) bool {
 	return false
 }
 
-func firstTurn(player int) int {
-	return 1
-}
-
-func nextTurn(player int) int {
+func changeActivePlayer(player int) int {
 	if player == 1 {
 		return 2
 	}
-
 	return 1
 }
 
-func currentTurn(player int, grid [7][7]string, row int, col int) (int, string, bool) {
-	gridAfterShot, _, shotResult := shootOpponent(grid, row, col)
+func currentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int, string, bool, error) {
+	gridAfterShot, coordErr, shotResult := shootOpponent(grid, row, col)
+
 	if shotResult == "miss" {
-		nextPlayer := nextTurn(player)
-		return nextPlayer, "miss", false
+		nextPlayer := changeActivePlayer(player)
+		return nextPlayer, "miss", false, coordErr
 	}
 
 	if shotResult == "hit" {
-		nextPlayer := nextTurn(player)
+		nextPlayer := changeActivePlayer(player)
 		gameResult := hasPlayerWon(gridAfterShot)
-		return nextPlayer, "hit", gameResult
+		return nextPlayer, "hit", gameResult, coordErr
 	}
 
-	return player, "invalid", false
+	return player, "invalid", false, coordErr
 }
