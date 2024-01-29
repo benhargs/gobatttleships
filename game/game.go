@@ -57,7 +57,7 @@ func CurrentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int
 		return 1, shotResult, gameResult, coordErr
 	}
 
-	return player, "invalid", false, coordErr
+	return player, shotResult, false, coordErr
 }
 func countOfShipsOnBoard(grid [7][7]string) int {
 	numberOfShips := 0
