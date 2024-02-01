@@ -30,7 +30,7 @@ func PlaceShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 	return grid, nil
 }
 
-func CurrentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int, bool, bool, error) {
+func CurrentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int, string, bool, error) {
 	gridAfterShot, coordErr, shotResult := shootOpponent(grid, row, col)
 
 	if coordErr != nil {
@@ -39,7 +39,7 @@ func CurrentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int
 
 	newPlayer := changePlayer(player)
 
-	if shotResult == true {
+	if shotResult == "Hit" {
 		gameResult := HasPlayerWon(gridAfterShot)
 		return newPlayer, shotResult, gameResult, coordErr
 	}
@@ -55,19 +55,19 @@ func HasPlayerWon(grid [7][7]string) bool {
 	return true
 }
 
-func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, bool) {
+func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, string) {
 	coordErr := areCoordinatesOnPlayingGrid(row, col)
 
 	if coordErr != nil {
-		return grid, coordErr, false
+		return grid, coordErr, "Miss"
 	}
 
 	if grid[row][col] == "Ship" {
 		grid[row][col] = ""
-		return grid, nil, true
+		return grid, nil, "Hit"
 	}
 
-	return grid, nil, false
+	return grid, nil, "Miss"
 }
 
 func areCoordinatesOnPlayingGrid(row int, col int) error {

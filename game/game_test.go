@@ -197,7 +197,7 @@ func TestReportsShipBeingHit(t *testing.T) {
 	_, _, got := shootOpponent(shipOnGrid, 1, 2)
 
 	//Assert
-	want := true
+	want := "Hit"
 	if got != want {
 		t.Errorf("shot did not report a hit ship, got %v want %v", got, want)
 	}
@@ -213,7 +213,7 @@ func TestShipCannotBeShotTwice(t *testing.T) {
 	_, _, got := shootOpponent(gridWithSunkShip, 1, 2)
 
 	//Arrange
-	want := false
+	want := "Miss"
 	if got != want {
 		t.Errorf("shot was not a miss, got %v want %v", got, want)
 	}
@@ -269,7 +269,7 @@ func TestReportCanReportMissAtEdgesOfGrid(t *testing.T) {
 		_, _, got := shootOpponent(grid, coordinates.row, coordinates.col)
 
 		//assert
-		want := false
+		want := "Miss"
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
 		}
@@ -297,7 +297,7 @@ func TestReportCanShootAtEdgesOfGrid(t *testing.T) {
 		_, _, got := shootOpponent(grid, coordinates.row, coordinates.col)
 
 		//assert
-		want := false
+		want := "Miss"
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
 		}
@@ -379,7 +379,7 @@ func TestPlayerHitsShipOnTurnAndReportsHit(t *testing.T) {
 	_, got, _, _ := CurrentPlayerTakeShot(player, gridWith1Ship, 1, 2)
 
 	//Assert
-	want := true
+	want := "Hit"
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
@@ -396,7 +396,7 @@ func TestPlayerMissesShipOnTurnAndReportsMiss(t *testing.T) {
 	_, got, _, _ := CurrentPlayerTakeShot(player, grid, row, col)
 
 	//Assert
-	want := false
+	want := "Miss"
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
@@ -411,7 +411,7 @@ func TestPlayerMissesGridOnTurnAndReportsInvalidShot(t *testing.T) {
 	_, got, _, _ := CurrentPlayerTakeShot(player, grid, -1, 4)
 
 	//Assert
-	want := false
+	want := "Miss"
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
