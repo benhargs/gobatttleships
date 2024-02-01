@@ -1,7 +1,6 @@
 package game
 
 import (
-	turn "battleships/turn"
 	"errors"
 	"fmt"
 )
@@ -22,7 +21,7 @@ func PlaceShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 		return grid, fmt.Errorf("ship already placed at coordinates row: %d and column: %d", row, col)
 	}
 
-	shipCount := countOfShipsOnBoard(grid)
+	shipCount := countOfShipsOnGrid(grid)
 	if shipCount == maxShip {
 		return grid, errors.New("too many ships")
 	}
@@ -31,16 +30,16 @@ func PlaceShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 	return grid, nil
 }
 
-func CurrentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int, string, bool, error) {
+func CurrentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int, bool, bool, error) {
 	gridAfterShot, coordErr, shotResult := shootOpponent(grid, row, col)
 
 	if coordErr != nil {
 		return player, shotResult, false, coordErr
 	}
 
-	newPlayer := turn.ChangePlayer(player)
+	newPlayer := changePlayer(player)
 
-	if shotResult == "hit" {
+	if shotResult == true {
 		gameResult := HasPlayerWon(gridAfterShot)
 		return newPlayer, shotResult, gameResult, coordErr
 	}
@@ -49,31 +48,26 @@ func CurrentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int
 }
 
 func HasPlayerWon(grid [7][7]string) bool {
-	numberOfSunkShips := countOfElementOnGrid(grid, "Sunk")
-	if numberOfSunkShips != 9 {
+	numberOfShips := countOfShipsOnGrid(grid)
+	if numberOfShips != 0 {
 		return false
 	}
 	return true
 }
 
-func countOfShipsOnBoard(grid [7][7]string) int {
-	numberOfShips := countOfElementOnGrid(grid, "Ship")
-	return numberOfShips
-}
-
-func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, string) {
+func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, bool) {
 	coordErr := areCoordinatesOnPlayingGrid(row, col)
 
 	if coordErr != nil {
-		return grid, coordErr, "invalid"
+		return grid, coordErr, false
 	}
 
 	if grid[row][col] == "Ship" {
-		grid[row][col] = "Sunk"
-		return grid, nil, "hit"
+		grid[row][col] = ""
+		return grid, nil, true
 	}
 
-	return grid, nil, "miss"
+	return grid, nil, false
 }
 
 func areCoordinatesOnPlayingGrid(row int, col int) error {
@@ -86,14 +80,21 @@ func areCoordinatesOnPlayingGrid(row int, col int) error {
 	return nil
 }
 
-func countOfElementOnGrid(grid [7][7]string, element string) int {
-	countOfElement := 0
+func countOfShipsOnGrid(grid [7][7]string) int {
+	shipCount := 0
 	for _, row := range grid {
 		for _, coordinates := range row {
-			if coordinates == element {
-				countOfElement++
+			if coordinates == "Ship" {
+				shipCount++
 			}
 		}
 	}
-	return countOfElement
+	return shipCount
+}
+
+func changePlayer(player int) int {
+	if player == 1 {
+		return 2
+	}
+	return 1
 }

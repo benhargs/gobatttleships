@@ -197,7 +197,7 @@ func TestReportsShipBeingHit(t *testing.T) {
 	_, _, got := shootOpponent(shipOnGrid, 1, 2)
 
 	//Assert
-	want := "hit"
+	want := true
 	if got != want {
 		t.Errorf("shot did not report a hit ship, got %v want %v", got, want)
 	}
@@ -213,7 +213,7 @@ func TestShipCannotBeShotTwice(t *testing.T) {
 	_, _, got := shootOpponent(gridWithSunkShip, 1, 2)
 
 	//Arrange
-	want := "miss"
+	want := false
 	if got != want {
 		t.Errorf("shot was not a miss, got %v want %v", got, want)
 	}
@@ -269,7 +269,7 @@ func TestReportCanReportMissAtEdgesOfGrid(t *testing.T) {
 		_, _, got := shootOpponent(grid, coordinates.row, coordinates.col)
 
 		//assert
-		want := "miss"
+		want := false
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
 		}
@@ -297,7 +297,7 @@ func TestReportCanShootAtEdgesOfGrid(t *testing.T) {
 		_, _, got := shootOpponent(grid, coordinates.row, coordinates.col)
 
 		//assert
-		want := "miss"
+		want := false
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
 		}
@@ -379,7 +379,7 @@ func TestPlayerHitsShipOnTurnAndReportsHit(t *testing.T) {
 	_, got, _, _ := CurrentPlayerTakeShot(player, gridWith1Ship, 1, 2)
 
 	//Assert
-	want := "hit"
+	want := true
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
@@ -396,7 +396,7 @@ func TestPlayerMissesShipOnTurnAndReportsMiss(t *testing.T) {
 	_, got, _, _ := CurrentPlayerTakeShot(player, grid, row, col)
 
 	//Assert
-	want := "miss"
+	want := false
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
@@ -411,7 +411,7 @@ func TestPlayerMissesGridOnTurnAndReportsInvalidShot(t *testing.T) {
 	_, got, _, _ := CurrentPlayerTakeShot(player, grid, -1, 4)
 
 	//Assert
-	want := "invalid"
+	want := false
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
@@ -535,10 +535,11 @@ func TestPlayerHitsShipOnTurnAndDoesNotReportWin(t *testing.T) {
 	//Arrange
 	player := 1
 	grid := CreateGrid()
-	gridWith1SunkShip, _ := PlaceShip(grid, 2, 4)
+	gridWithShip, _ := PlaceShip(grid, 2, 4)
+	gridWith2Ships, _ := PlaceShip(gridWithShip, 1, 3)
 
 	//Act
-	_, _, got, _ := CurrentPlayerTakeShot(player, gridWith1SunkShip, 2, 4)
+	_, _, got, _ := CurrentPlayerTakeShot(player, gridWith2Ships, 2, 4)
 
 	//Assert
 	want := false
