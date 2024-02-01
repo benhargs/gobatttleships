@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+var hit = "Hit"
+var miss = "Miss"
+var ship = "Ship"
+
 func CreateGrid() (grid [7][7]string) {
 	return [7][7]string{}
 }
@@ -17,7 +21,7 @@ func PlaceShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 		return grid, coordErr
 	}
 
-	if grid[row][col] == "Ship" {
+	if grid[row][col] == ship {
 		return grid, fmt.Errorf("ship already placed at coordinates row: %d and column: %d", row, col)
 	}
 
@@ -26,7 +30,7 @@ func PlaceShip(grid [7][7]string, row int, col int) ([7][7]string, error) {
 		return grid, errors.New("too many ships")
 	}
 
-	grid[row][col] = "Ship"
+	grid[row][col] = ship
 	return grid, nil
 }
 
@@ -39,7 +43,7 @@ func CurrentPlayerTakeShot(player int, grid [7][7]string, row int, col int) (int
 
 	newPlayer := changePlayer(player)
 
-	if shotResult == "Hit" {
+	if shotResult == hit {
 		gameResult := HasPlayerWon(gridAfterShot)
 		return newPlayer, shotResult, gameResult, coordErr
 	}
@@ -59,15 +63,15 @@ func shootOpponent(grid [7][7]string, row int, col int) ([7][7]string, error, st
 	coordErr := areCoordinatesOnPlayingGrid(row, col)
 
 	if coordErr != nil {
-		return grid, coordErr, "Miss"
+		return grid, coordErr, miss
 	}
 
-	if grid[row][col] == "Ship" {
+	if grid[row][col] == ship {
 		grid[row][col] = ""
-		return grid, nil, "Hit"
+		return grid, nil, hit
 	}
 
-	return grid, nil, "Miss"
+	return grid, nil, miss
 }
 
 func areCoordinatesOnPlayingGrid(row int, col int) error {
@@ -84,7 +88,7 @@ func countOfShipsOnGrid(grid [7][7]string) int {
 	shipCount := 0
 	for _, row := range grid {
 		for _, coordinates := range row {
-			if coordinates == "Ship" {
+			if coordinates == ship {
 				shipCount++
 			}
 		}
